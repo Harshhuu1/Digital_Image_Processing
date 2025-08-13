@@ -3,10 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def bit_slicing(image_path):
-    # 1. Read image
+    
     img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
-    # 2. Convert RGB to grayscale if needed
+    
     if img.ndim == 3:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
