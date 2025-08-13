@@ -1,44 +1,57 @@
-#!/bin/bash
 # ============================================
-# Lab 2 – Bit Slicing & Histogram Equalization
+# Lab 2 – Bit-Plane Slicing & Histogram Equalization
 # IIIT Nagpur – Digital Image Processing Lab
 # ============================================
 
-echo "📌 Setting up Lab 2 environment..."
+# 1. Bit-Plane Slicing
+# --------------------
+# Concept:
+#   - Grayscale pixels are 8-bit values (0–255).
+#   - Bit-Plane Slicing isolates each bit from MSB (bit 8) to LSB (bit 1).
+#   - Higher-order bits capture major image structures.
+#   - Lower-order bits contain finer, noise-like details.
+#
+# Applications:
+#   - Image compression
+#   - Image enhancement
+#   - Feature extraction
 
-# Step 1: Clone the repository
-echo "➡️ Cloning repository..."
-git clone https://github.com/<your-username>/Digital-Image-Processing-Lab.git
-cd Digital-Image-Processing-Lab || exit
+# Steps:
+#   1. Read input image.
+#   2. Convert to grayscale if RGB.
+#   3. For each pixel, extract bits using bitwise operations.
+#   4. Store and display all 8 bit-planes.
 
-# Step 2: Install dependencies
-echo "➡️ Installing required Python libraries..."
+# --------------------------------------------
+
+# 2. Histogram Equalization
+# -------------------------
+# Concept:
+#   - Improves image contrast by redistributing pixel intensities.
+#   - Uses the Cumulative Distribution Function (CDF) to remap values.
+#   - Makes dark regions lighter and bright regions more detailed.
+#
+# Formula:
+#   Equalized_Value = ((CDF - CDF_min) / ((M*N) - CDF_min)) * 255
+#   where M, N = image dimensions
+#
+# Steps:
+#   1. Read grayscale image.
+#   2. Compute histogram (frequency of intensities).
+#   3. Calculate CDF.
+#   4. Apply equalization formula manually.
+#   5. Map old pixel values to new equalized values.
+#   6. Display original & equalized images with histograms.
+
+# --------------------------------------------
+
+# Requirements:
 pip install opencv-python matplotlib numpy
 
-# Step 3: About Bit-Plane Slicing
-echo "ℹ️ Bit-Plane Slicing: 
-- Analyzes individual bits of each pixel.
-- Helps in compression, enhancement, and feature extraction.
-- Grayscale pixels are 8-bit values (0–255).
-- This step extracts all 8 planes using bitwise operations."
-
-# Step 4: About Histogram Equalization
-echo "ℹ️ Histogram Equalization:
-- Improves image contrast by redistributing pixel intensities.
-- Uses Cumulative Distribution Function (CDF) to remap values.
-- Enhances low-contrast details."
-
-# Step 5: Run the Bit Slicing program
-echo "➡️ Running Bit Slicing program..."
+# To Run:
 python Lab2/bit_slicing.py
-
-# Step 6: Run the Histogram Equalization program
-echo "➡️ Running Histogram Equalization program..."
 python Lab2/histogram_equalization.py
 
-# Step 7: Expected Output
-echo "📊 Output:
-- Bit-plane images from MSB to LSB.
-- Original & equalized images with histograms."
-
-echo "✅ Lab 2 execution complete!"
+# Expected Output:
+#   - Bit-plane images from MSB to LSB.
+#   - Original vs equalized images with their histograms.
