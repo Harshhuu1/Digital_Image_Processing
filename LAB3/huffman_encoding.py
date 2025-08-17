@@ -1,33 +1,70 @@
+import cv2
+import numpy as np
 import heapq
+import matplotlib.pyplot as plt
+from collections import defaultdict
 
-def huffman(symbols_probs):
-    # Step 1: Create priority queue (min-heap)
-    heap = [[prob, [symbol, ""]] for symbol, prob in symbols_probs.items()]
+# ---------- Huffman Encoding Helpers ----------
+class Node:
+    def __init__(self, freq, symbol=None, left=None, right=None):
+        self.freq = freq
+        self.symbol = symbol
+        self.left = left
+        self.right = right
+    def __lt__(self, other):  # for heapq
+        return self.freq < other.freq
+
+def build_huffman_tree(frequencies):
+    heap = [Node(freq, sym) for sym, freq in frequencies.items()]
     heapq.heapify(heap)
-
-    # Step 2: Merge nodes until one tree remains
     while len(heap) > 1:
-        lo = heapq.heappop(heap)  # least prob
-        hi = heapq.heappop(heap)  # second least prob
-        for pair in lo[1:]:
-            pair[1] = '0' + pair[1]
-        for pair in hi[1:]:
-            pair[1] = '1' + pair[1]
-        heapq.heappush(heap, [lo[0] + hi[0]] + lo[1:] + hi[1:])
+        n1 = heapq.heappop(heap)
+        n2 = heapq.heappop(heap)
+        merged = Node(n1.freq+n2.freq, left=n1, right=n2)
+        heapq.heappush(heap, merged)
+    return heap[0]
 
-    # Step 3: Return codes
-    return dict(sorted(heap[0][1:], key=lambda x: x[0]))
+def build_codes(node, prefix="", codebook={}):
+    if node.symbol is not None:
+        codebook[node.symbol] = prefix
+    else:
+        build_codes(node.left, prefix+"0", codebook)
+        build_codes(node.right, prefix+"1", codebook)
+    return codebook
 
+# ---------- Main Process ----------
+# Read grayscale image
+img = cv2.imread("download.jpg", cv2.IMREAD_GRAYSCALE)
 
-# Example usage
-symbols_probs = {
-    'A': 0.4,
-    'B': 0.3,
-    'C': 0.2,
-    'D': 0.1
-}
+# Count frequencies
+unique, counts = np.unique(img, return_counts=True)
+frequencies = dict(zip(unique, counts))
 
-huff_codes = huffman(symbols_probs)
-print("\nHuffman Codes:")
-for symbol, code in huff_codes.items():
-    print(symbol, ":", code)
+# Build Huffman codes
+root = build_huffman_tree(frequencies)
+codes = build_codes(root)
+
+# Encode image
+encoded_data = ''.join(codes[pixel] for row in img for pixel in row)
+
+# Decode image
+decoded_pixels = []
+current_code = ""
+for bit in encoded_data:
+    current_code += bit
+    for sym, code in codes.items():
+        if code == current_code:
+            decoded_pixels.append(sym)
+            current_code = ""
+            break
+
+decoded_img = np.array(decoded_pixels, dtype=np.uint8).reshape(img.shape)
+
+# ---------- Show Results ----------
+plt.figure(figsize=(8,4))
+plt.subplot(1,2,1); plt.imshow(img, cmap='gray'); plt.title("Original")
+plt.subplot(1,2,2); plt.imshow(decoded_img, cmap='gray'); plt.title("Decoded")
+plt.show()
+
+print("Original size (bits):", img.size * 8)
+print("Compressed size (bits):", len(encoded_data))
